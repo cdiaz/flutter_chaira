@@ -13,10 +13,17 @@ import io.flutter.plugin.common.PluginRegistry.Registrar
 
 class FlutterChairaPlugin private constructor(private val registrar: Registrar) : MethodCallHandler {
   companion object {
+    lateinit var callbackResult: Result 
     @JvmStatic
     fun registerWith(registrar: Registrar) {
       val channel = MethodChannel(registrar.messenger(), "flutter_chaira")
       channel.setMethodCallHandler(FlutterChairaPlugin(registrar))
+    }
+
+    fun resolveResponseType(code: String, error: String?) {
+      if (error != null)
+        callbackResult.success(null)
+      callbackResult.success(code)
     }
   }
 
@@ -31,6 +38,7 @@ class FlutterChairaPlugin private constructor(private val registrar: Registrar) 
   }
 
   private fun handleShowUrl(call: MethodCall, result: Result) {
+    callbackResult = result
     @SuppressWarnings("unchecked")
     val arguments = call.arguments as Map<String, Object>
     val url = arguments["url"] as String
