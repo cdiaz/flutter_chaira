@@ -22,8 +22,8 @@ class _MyAppState extends State<MyApp> {
   }
 
   void login() async {
-    _chaira.authorize().then((code) {
-      print(code);
+    _chaira.authorize().then((accessToken) {
+      print(accessToken);
     }).catchError((err) => print('Error: $err'));
   }
 
