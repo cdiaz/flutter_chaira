@@ -82,4 +82,22 @@ class Chaira {
     }
   }
 
+ Future<dynamic> logout(
+    {@required String token }) async {
+    Map<String, String> header = {'Authorization': 'Bearer $token'};
+    header.addAll(headers);
+    dynamic response = await http.get(
+      Uri.encodeFull(
+        'https://chaira.udla.edu.co/ChairaApi/oauth2/logout'
+      ),
+      headers: header
+    );
+    try {
+      dynamic result = json.decode(response.body);
+      return result;
+    } catch (e) {
+      return null;
+    }
+  }
+
 }

@@ -18,6 +18,7 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   bool isLoggedIn = false;
   var profileData;
+  var accessToken;
 
   void onLoginStatusChanged(bool isLoggedIn, {profileData}) {
     setState(() {
@@ -27,14 +28,25 @@ class _MyAppState extends State<MyApp> {
   }
 
   void login() async {
-    _chaira.authorize().then((accessToken) {
-      this.getUserProfile(accessToken);
+    _chaira.authorize().then((token) {
+      accessToken = token;
+      this.getUserProfile();
     }).catchError((err) => print('Error: $err'));
   }
 
-  void getUserProfile(token) async {
-    _chaira.getUserProfile(token: token).then((profile) {
+  void getUserProfile() async {
+    _chaira.getUserProfile(token: accessToken).then((profile) {
       onLoginStatusChanged(true, profileData: profile);
+    });
+  }
+
+  void logout() async {
+    _chaira.logout(token: accessToken).then((response) {
+      if(response['state'] != 'error') {
+        onLoginStatusChanged(false);
+      } else {
+        print(response['detail']);
+      }
     });
   }
 
@@ -45,6 +57,16 @@ class _MyAppState extends State<MyApp> {
         appBar: AppBar(
           title: const Text('Flutter Chaira'),
           backgroundColor: Colors.green[900],
+          actions: isLoggedIn
+           ? <Widget>[
+              IconButton(
+                icon: Icon(
+                  Icons.exit_to_app,
+                  color: Colors.white,
+                ),
+                onPressed: () => logout())
+            ]
+            : null
         ),
         body: Center(
           child: isLoggedIn
@@ -111,4 +133,5 @@ class _MyAppState extends State<MyApp> {
       ],
     );
   }
+
 }
