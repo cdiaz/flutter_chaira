@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
-import 'dart:async';
 
-import 'package:flutter/services.dart';
 import 'package:flutter_chaira/flutter_chaira.dart';
+
+final String clientId = '<your ClientId>';
+final String clientSecret = '<your ClientSecret>';
+
+final Chaira _chaira =
+    new Chaira(clientId: clientId, clientSecret: clientSecret);
 
 void main() => runApp(MyApp());
 
@@ -12,26 +16,15 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  String _bundleIdentifier = '';
-
   @override
   void initState() {
     super.initState();
-    initPlatformState();
   }
 
-  Future<void> initPlatformState() async {
-    String bundleIdentifier;
-    try {
-      bundleIdentifier = await FlutterChaira.bundleIdentifier;
-    } on PlatformException {
-      bundleIdentifier = 'Failed to get applicationId.';
-    }
-    if (!mounted) return;
-
-    setState(() {
-      _bundleIdentifier = bundleIdentifier;
-    });
+  void login() async {
+    _chaira.authorize().then((code) {
+      print(code);
+    }).catchError((err) => print('Error: $err'));
   }
 
   @override
@@ -43,9 +36,28 @@ class _MyAppState extends State<MyApp> {
           backgroundColor: Colors.green[900],
         ),
         body: Center(
-          child: Text('applicationId: $_bundleIdentifier\n'),
+          child: displayLoginButton(),
         ),
       ),
     );
+  }
+
+  displayLoginButton() {
+    return OutlineButton(
+        shape: StadiumBorder(),
+        highlightedBorderColor: Colors.green,
+        textColor: Colors.green,
+        child: Text(
+          'Iniciar sesión',
+          style: new TextStyle(
+            fontSize: 17.5,
+            color: Colors.green,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 1,
+          ),
+        ),
+        borderSide: BorderSide(
+            color: Colors.green, style: BorderStyle.solid, width: 1.8),
+        onPressed: login);
   }
 }
