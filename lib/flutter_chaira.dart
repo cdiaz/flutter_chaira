@@ -10,6 +10,10 @@ class Chaira {
   final String clientSecret;
   final String platformName = Platform.isAndroid ? 'android' : 'ios';
   static const MethodChannel _channel = const MethodChannel('flutter_chaira');
+  static const Map<String, String> headers = {
+    'Accept': 'application/json',
+    'Content-Type': 'application/json'
+  };
 
   Chaira({this.clientId, this.clientSecret});
 
@@ -32,10 +36,7 @@ class Chaira {
     try {
       http.Response response = await http.post(
         Uri.encodeFull('https://chaira.udla.edu.co/ChairaApi/oauth2/token'),
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        },
+        headers: headers,
         body: jsonEncode({
           'code': code,
           'redirect_uri': redirectUri,
@@ -50,4 +51,35 @@ class Chaira {
       return '[Exchange WebAuthentication Error]: ${e.message}';
     }
   }
+
+   Future<dynamic> getUserProfile(
+    {@required String token }) async {
+    List<String> claims = [
+      'CORREO',
+      'FOTO',
+      'EDAD',
+      'GENERO',
+      'ID_USUARIO',
+      'NOMBRE'
+    ];
+    Map<String, String> header = {'Authorization': 'Bearer $token'};
+    header.addAll(headers);
+    dynamic response = await http.get(
+      Uri.encodeFull(
+        'https://chaira.udla.edu.co/ChairaApi/consultar?recurso=GjR9jrQ4mrF'
+      ),
+      headers: header,
+    );
+    try {
+      Map<dynamic, dynamic> user = Map();
+      dynamic body = json.decode(response.body);
+      claims.forEach((claim) {
+        user[claim] = body['data'][0][claim];
+      });
+      return user;
+    } catch (e) {
+      return null;
+    }
+  }
+
 }
